@@ -1,0 +1,9 @@
+.pio/
+.vscode/
+
+.venv/
+venv/
+
+/include/README
+/lib/README
+/test/README
