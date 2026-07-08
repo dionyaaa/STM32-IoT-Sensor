@@ -6,6 +6,8 @@
 extern UART_HandleTypeDef huart3;
 extern I2C_HandleTypeDef hi2c1;
 
+void Error_Handler(void);
+
 void SystemClock_Config(void);
 void MX_GPIO_Init(void);
 void MX_USART3_UART_Init(void);
