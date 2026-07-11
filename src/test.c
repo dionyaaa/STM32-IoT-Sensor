@@ -15,10 +15,7 @@ static char buffer[128];
 // Статическая функция для вывода текста с помощью UART:
 static void test_uart_send(const char* message)
 {
-    if(huart_test != NULL)
-    {
-        HAL_UART_Transmit(huart_test, (uint8_t*)message, strlen(message), 100);
-    }
+    HAL_UART_Transmit(huart_test, (uint8_t*)message, strlen(message), 100);
 }
 
 // Функция объявления переменных тестируемой периферии:
@@ -33,51 +30,47 @@ void Test_Init(UART_HandleTypeDef* huart, I2C_HandleTypeDef* hi2c)
 // Функция теста отправки сообщения по UART:
 void Test_UART_Send(const char* message)
 {
-    assert(message != NULL);
+    assert(message != NULL && huart_test != NULL);
     test_uart_send(message);
 }
 
 // Функция сканирования подключённых по I2C устройств:
 void Test_I2C_Scan(void)
 {
-    if(hi2c_test != NULL)
+    assert(hi2c_test != NULL);
+    test_uart_send("Scanning I2C...\r\n");
+    uint8_t found_devices = 0;
+
+    for (uint16_t addr = 1; addr < 128; addr++)
     {
-        test_uart_send("Scanning I2C...\r\n");
-        uint8_t found_devices = 0;
-
-        for (uint16_t addr = 1; addr < 128; addr++)
+        if (HAL_I2C_IsDeviceReady(hi2c_test, (addr << 1), 2, 10) == HAL_OK)
         {
-            if (HAL_I2C_IsDeviceReady(hi2c_test, (addr << 1), 2, 10) == HAL_OK)
-            {
-                sprintf(buffer, "Found at 0x%02X\r\n", addr);
-                test_uart_send(buffer);
-                found_devices++;
-            }
+            sprintf(buffer, "Found at 0x%02X\r\n", addr);
+            test_uart_send(buffer);
+            found_devices++;
         }
+    }
 
-        if(found_devices == 0)
-        {
-            test_uart_send("No I2C devices found\r\n");
-        }
+    if(found_devices == 0)
+    {
+        test_uart_send("No I2C devices found\r\n");
     }
 }
 
 // Функция чтения регистров подключённых устройств:
 void Test_I2C_ReadReg(uint16_t dev_addr, uint16_t reg_addr)
 {
-    if(hi2c_test != NULL)
-    {
-        uint8_t value = 0;
-        HAL_StatusTypeDef status = HAL_I2C_Mem_Read(hi2c_test, dev_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, &value, 1, 100);
+    assert(hi2c_test != NULL);
+    uint8_t value = 0;
+    HAL_StatusTypeDef status = HAL_I2C_Mem_Read(hi2c_test, dev_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, &value, 1, 100);
 
-        if (status == HAL_OK)
-        {
-            sprintf(buffer, "Reg_addr 0x%02X at 0x%02X = 0x%02X\r\n", reg_addr, dev_addr, value);
-        }
-        else
-        {
-            sprintf(buffer, "Read error: %d (Dev_addr: 0x%02X, reg_addr: 0x%02X)\r\n", status, dev_addr, reg_addr);
-        }
-        test_uart_send(buffer);
+    if (status == HAL_OK)
+    {
+        sprintf(buffer, "Reg_addr 0x%02X at 0x%02X = 0x%02X\r\n", reg_addr, dev_addr, value);
     }
+    else
+    {
+        sprintf(buffer, "Read error: %d (Dev_addr: 0x%02X, reg_addr: 0x%02X)\r\n", status, dev_addr, reg_addr);
+    }
+    test_uart_send(buffer);
 }
