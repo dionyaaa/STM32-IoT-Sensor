@@ -24,7 +24,7 @@ int main(void)
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
 
     // Инициализация драйверов периферии:
-    Sensors_Init();
+    Sensors_Init(&hi2c1);
 
     // Инициализация драйверов периферии успешна, горит только зелёный светодиод:
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);

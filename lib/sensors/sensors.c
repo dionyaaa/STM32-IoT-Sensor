@@ -4,10 +4,11 @@
 #include <assert.h> // Для assert().
 #include <stdint.h> // Для типов uint8_t и uint32_t.
 
-#include "board.h"
 #include "sensors.h"
 
-// Инициализация глобальных структур:
+// Инициализация статических переменных:
+static I2C_HandleTypeDef* sensors_hi2c = NULL;
+
 static uint8_t dev_addr = BME280_I2C_ADDR_PRIM;
 static struct bme280_dev dev;
 static struct bme280_settings settings;
@@ -16,7 +17,7 @@ static struct bme280_settings settings;
 static int8_t bme280_i2c_read(uint8_t reg_addr, uint8_t* reg_data, uint32_t length, void* intf_ptr)
 {
     uint8_t intf_addr = *(uint8_t*)intf_ptr;
-    int8_t result = HAL_I2C_Mem_Read(&hi2c1, intf_addr << 1, reg_addr, I2C_MEMADD_SIZE_8BIT, reg_data, length, 250);
+    int8_t result = HAL_I2C_Mem_Read(sensors_hi2c, intf_addr << 1, reg_addr, I2C_MEMADD_SIZE_8BIT, reg_data, length, 250);
     if(result != HAL_OK)
     {
         return BME280_E_COMM_FAIL;
@@ -30,7 +31,7 @@ static int8_t bme280_i2c_read(uint8_t reg_addr, uint8_t* reg_data, uint32_t leng
 static int8_t bme280_i2c_write(uint8_t reg_addr, const uint8_t* reg_data, uint32_t length, void* intf_ptr)
 {
     uint8_t intf_addr = *(uint8_t*)intf_ptr;
-    int8_t result = HAL_I2C_Mem_Write(&hi2c1, intf_addr << 1, reg_addr, I2C_MEMADD_SIZE_8BIT, (uint8_t*)reg_data, length, 250);
+    int8_t result = HAL_I2C_Mem_Write(sensors_hi2c, intf_addr << 1, reg_addr, I2C_MEMADD_SIZE_8BIT, (uint8_t*)reg_data, length, 250);
     if(result != HAL_OK)
     {
         return BME280_E_COMM_FAIL;
@@ -48,8 +49,14 @@ static void bme280_delay_us(uint32_t period, void* intf_ptr)
 }
 
 // Функция инициализации датчиков:
-void Sensors_Init(void)
+void Sensors_Init(I2C_HandleTypeDef* hi2c)
 {
+    // Проверка передаваемых данных:
+    assert(hi2c != NULL);
+
+    // Подключение I2C:
+    sensors_hi2c = hi2c;
+
     // Код возврата:
     int8_t result = BME280_OK;
 
@@ -96,7 +103,7 @@ void Sensors_Init(void)
 void Sensors_ReadAll(SensorsData_t* data)
 {
     // Проверка передаваемых данных:
-    assert(data != NULL);
+    assert(data != NULL && sensors_hi2c != NULL);
 
     // Переменные:
     int8_t result = BME280_OK;
