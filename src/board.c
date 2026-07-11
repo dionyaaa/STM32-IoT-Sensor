@@ -2,6 +2,7 @@
 #include "board.h"
 
 // Инициализация глобальных структур:
+UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 I2C_HandleTypeDef hi2c1;
 
@@ -92,7 +93,24 @@ void MX_GPIO_Init(void)
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0 | GPIO_PIN_14 | GPIO_PIN_7, GPIO_PIN_RESET);
 }
 
-// Функции инициализации USART3:
+// Функции инициализации USART2 и USART3:
+void MX_USART2_UART_Init(void)
+{
+    huart2.Instance = USART2;
+    huart2.Init.BaudRate = 115200;
+    huart2.Init.WordLength = UART_WORDLENGTH_8B;
+    huart2.Init.StopBits = UART_STOPBITS_1;
+    huart2.Init.Parity = UART_PARITY_NONE;
+    huart2.Init.Mode = UART_MODE_TX_RX;
+    huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+
+    if (HAL_UART_Init(&huart2) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
+
 void MX_USART3_UART_Init(void)
 {
     huart3.Instance = USART3;
@@ -114,7 +132,19 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-    if(huart->Instance == USART3)
+    if(huart->Instance == USART2)
+    {
+        __HAL_RCC_USART2_CLK_ENABLE();
+        __HAL_RCC_GPIOD_CLK_ENABLE();
+
+        GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_6;
+        GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+        GPIO_InitStruct.Pull = GPIO_NOPULL;
+        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+        GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
+        HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+    }
+    else if(huart->Instance == USART3)
     {
         __HAL_RCC_USART3_CLK_ENABLE();
         __HAL_RCC_GPIOD_CLK_ENABLE();

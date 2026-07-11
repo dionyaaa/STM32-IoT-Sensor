@@ -16,6 +16,7 @@ int main(void)
 
     // Инициализация периферии:
     MX_GPIO_Init();
+    MX_USART2_UART_Init();
     MX_USART3_UART_Init();
     MX_I2C1_Init();
 
