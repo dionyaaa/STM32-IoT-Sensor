@@ -5,6 +5,7 @@
 
 #include "board.h"
 #include "sensors.h"
+#include "network.h"
 
 int main(void)
 {
@@ -25,19 +26,23 @@ int main(void)
 
     // Инициализация драйверов периферии:
     Sensors_Init(&hi2c1);
+    Network_Init(&huart2, &huart3);
 
-    // Инициализация драйверов периферии успешна, горит только зелёный светодиод:
+    // Подключение к Wi-Fi-сети:
+    Network_ConnectWiFi();
+
+    // Инициализация драйверов периферии и подключение к Wi-Fi прошло успешно, горит только зелёный светодиод:
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
 
     // Переменные:
-    char buffer[128];
     SensorsData_t data;
 
     while (1)
     {
         // Главный цикл.
         Sensors_ReadAll(&data); // Чтение всех показаний датчика.
-        HAL_Delay(1000); // Задержка перед повторным чтением.
+        Network_Send(&data); // Отправка данных на сервер.
+        HAL_Delay(10000); // Задержка перед повторным чтением.
     }
 }

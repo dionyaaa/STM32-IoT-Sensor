@@ -7,3 +7,5 @@ venv/
 /include/README
 /lib/README
 /test/README
+
+/include/config_secret.h
