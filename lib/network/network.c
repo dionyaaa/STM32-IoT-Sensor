@@ -93,31 +93,42 @@ void Network_ConnectWiFi(void)
     network_uart_send(wifi_connect, response, RESPONSE_SIZE);
 
     HAL_Delay(WIFI_CONNECT_TIMEOUT);
+}
 
-    // Проверка корректности подключения к Wi-Fi-сети:
-    if(network_uart_send("AT+CWJAP_CUR?", response, RESPONSE_SIZE) != NETWORK_OK && strstr(response, WIFI_SSID) == NULL)
+// Функция проверки подключения к Wi-Fi-сети:
+uint8_t Network_CheckWiFi(void)
+{
+    // Проверка инициализации Wi-Fi-модуля:
+    assert(network_huart != NULL);
+
+    // Проверка подключения к Wi-Fi-сети:
+    if(network_uart_send("AT+CWJAP_CUR?", response, RESPONSE_SIZE) == NETWORK_OK && strstr(response, WIFI_SSID) != NULL)
     {
-        Error_Handler();
+        return NETWORK_OK;
+    }
+    else
+    {
+        return NETWORK_ERROR;
     }
 }
 
 // Функция отправки данных на сервер:
-void Network_Send(SensorsData_t* data)
+uint8_t Network_Send(SensorsData_t* data)
 {
     // Проверка передаваемых данных:
     assert(data != NULL && network_huart != NULL);
 
     // Подключение к серверу:
     char server_connect[128];
-    sprintf(server_connect, "AT+CIPSTART=\"TCP\",\"%s\",%d", HOST, PORT);
+    sprintf(server_connect, "AT+CIPSTART=\"SSL\",\"%s\",%d", HOST, PORT);
     network_uart_send(server_connect, response, RESPONSE_SIZE);
 
     HAL_Delay(SERVER_CONNECT_TIMEOUT);
 
     // Проверка корректности подключения к серверу:
-    if(network_uart_send("AT+CIPSTATUS", response, RESPONSE_SIZE) != NETWORK_OK && strstr(response, "STATUS:3") == NULL)
+    if(network_uart_send("AT+CIPSTATUS", response, RESPONSE_SIZE) != NETWORK_OK || strstr(response, "STATUS:3") == NULL)
     {
-        Error_Handler();
+        return NETWORK_ERROR;
     }
 
     // Создание строки типа JSON:
@@ -136,18 +147,19 @@ void Network_Send(SensorsData_t* data)
     sprintf(request,
             "POST %s HTTP/1.1\r\n"
             "Host: %s:%d\r\n"
+            "X-Sensor-ID: %s\r\n"
             "Content-Type: application/json\r\n"
             "Content-Length: %d\r\n"
             "\r\n"
             "%s",
-            PATH, HOST, PORT, strlen(json_data), json_data
+            PATH, HOST, PORT, SENSOR_ID, strlen(json_data), json_data
     );
 
     // Подготовка к отправке данных на сервер:
     sprintf(server_connect, "AT+CIPSEND=%d", strlen(request));
     if(network_uart_send(server_connect, response, RESPONSE_SIZE) != NETWORK_OK || strchr(response, '>') == NULL)
     {
-        Error_Handler();
+        return NETWORK_ERROR;
     }
 
     // Отправка данных на сервер:
@@ -165,11 +177,13 @@ void Network_Send(SensorsData_t* data)
     }
     if(strstr(response, "SEND OK") == NULL)
     {
-        Error_Handler();
+        return NETWORK_ERROR;
     }
 
     HAL_Delay(SEND_TIME);
 
     // Закрытие соединения, если не было закрыто со стороны сервера:
     network_uart_send("AT+CIPCLOSE", response, RESPONSE_SIZE);
+
+    return NETWORK_OK;
 }

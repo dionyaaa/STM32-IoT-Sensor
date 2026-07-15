@@ -10,6 +10,8 @@
     #define HOST "127.0.0.1"
     #define PORT 5000
     #define PATH "/receive"
+
+    #define SENSOR_ID "SENSOR_XXXXXXXXXXXXXXXX"
 #endif
 
 #endif

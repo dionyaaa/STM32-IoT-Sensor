@@ -9,3 +9,6 @@ venv/
 /test/README
 
 /include/config_secret.h
+/server/certs/
+/server/database.db
+/server/sensors.json

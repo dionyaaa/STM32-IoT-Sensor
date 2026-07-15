@@ -12,11 +12,12 @@
 #define RESTART_TIME 2000
 #define SEND_TIME 2000
 
-#define WIFI_CONNECT_TIMEOUT 10000
-#define SERVER_CONNECT_TIMEOUT 2000
+#define WIFI_CONNECT_TIMEOUT 8000
+#define SERVER_CONNECT_TIMEOUT 5000
 
 void Network_Init(UART_HandleTypeDef* huart, UART_HandleTypeDef* debug_huart);
 void Network_ConnectWiFi(void);
-void Network_Send(SensorsData_t* data);
+uint8_t Network_CheckWiFi(void);
+uint8_t Network_Send(SensorsData_t* data);
 
 #endif

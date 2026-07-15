@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset = "UTF-8">
+        <title>Sensor Database</title>
+    </head>
+    <body>
+        <a href = "/">Sensor List</a> <a href = "/database">Sensor Database</a>
+        <h1>Sensor Database:</h1>
+        <table border="1">
+            <tr>
+                <th>Name</th>
+                <th>Temperature</th>
+                <th>Pressure</th>
+                <th>Humidity</th>
+                <th>Time</th>
+            </tr>
+            {%for value in data%}
+                <tr>
+                    <td>{{value[2]}}</td>
+                    <td>{{value[3]}}</td>
+                    <td>{{value[4]}}</td>
+                    <td>{{value[5]}}</td>
+                    <td>{{value[6]}}</td>
+                </tr>
+            {%endfor%}
+        </table>
+    </body>
+</html>

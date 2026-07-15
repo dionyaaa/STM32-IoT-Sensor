@@ -2,13 +2,22 @@
 <html>
     <head>
         <meta charset = "UTF-8">
-        <title>Sensors data</title>
+        <title>Sensor List</title>
     </head>
     <body>
-        <h1>Sensors data:</h1>
-        Temperature: {{data["temperature"]}}<br>
-        Pressure: {{data["pressure"]}}<br>
-        Humidity: {{data["humidity"]}}<br>
-        Time: {{data["time"]}}<br>
+        <a href = "/">Sensor List</a> <a href = "/database">Sensor Database</a>
+        <h1>Sensor List:</h1>
+        <table border="1">
+            <tr>
+                <th>№</th>
+                <th>Sensor name</th>
+            </tr>
+            {%for name in names%}
+                <tr>
+                    <td>{{loop.index}}</td>
+                    <td>{{name}}</td>
+                </tr>
+            {%endfor%}
+        </table>
     </body>
 </html>
