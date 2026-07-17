@@ -4,6 +4,7 @@
 #include <string.h> // Для strlen().
 
 #include "board.h"
+#include "display.h"
 #include "sensors.h"
 #include "network.h"
 
@@ -32,6 +33,7 @@ int main(void)
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
 
     // Инициализация драйверов периферийных устройств:
+    Display_Init();
     Sensors_Init(&hi2c1);
     Network_Init(&huart2, &huart3);
 

@@ -2,6 +2,7 @@
 
 #include <stdint.h> // Для типа uint32_t.
 
+#include "config.h"
 #include "board.h"
 
 // Инициализация глобальных структур:
@@ -101,8 +102,14 @@ void MX_GPIO_Init(void)
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
     // Включение тактирования портов:
+    // __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
+    // __HAL_RCC_GPIOD_CLK_ENABLE();
+    __HAL_RCC_GPIOE_CLK_ENABLE();
+    // __HAL_RCC_GPIOF_CLK_ENABLE();
+    // __HAL_RCC_GPIOG_CLK_ENABLE();
+    // __HAL_RCC_GPIOH_CLK_ENABLE();
 
     // Настройка пинов PB0, PB7 и PB14 (светодиоды):
     GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_7 | GPIO_PIN_14;
@@ -119,6 +126,18 @@ void MX_GPIO_Init(void)
 
     // Выключение пинов PB0, PB7 и PB14 (светодиоды):
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0 | GPIO_PIN_14 | GPIO_PIN_7, GPIO_PIN_RESET);
+
+    // Настройка пинов подключения дисплея:
+    GPIO_InitStruct.Pin = DISPLAY_RS_PIN | DISPLAY_E_PIN | DISPLAY_DB4_PIN |
+                        DISPLAY_DB5_PIN | DISPLAY_DB6_PIN | DISPLAY_DB7_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(DISPLAY_GPIO_PORT, &GPIO_InitStruct);
+
+    // Выключение пинов подключение дисплея:
+    HAL_GPIO_WritePin(DISPLAY_GPIO_PORT, DISPLAY_RS_PIN | DISPLAY_E_PIN | DISPLAY_DB4_PIN |
+                    DISPLAY_DB5_PIN | DISPLAY_DB6_PIN | DISPLAY_DB7_PIN, GPIO_PIN_RESET);
 }
 
 // Функции инициализации USART2 и USART3:
