@@ -19,6 +19,9 @@ int main(void)
     // Настройка тактирования:
     SystemClock_Config();
 
+    // Инициализации счётчика DWT:
+    DWT_Init();
+    
     // Инициализация периферии:
     MX_GPIO_Init();
     MX_USART2_UART_Init();

@@ -1,10 +1,16 @@
 #include "stm32f4xx_hal.h"
+
+#include <stdint.h> // Для типа uint32_t.
+
 #include "board.h"
 
 // Инициализация глобальных структур:
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 I2C_HandleTypeDef hi2c1;
+
+// Инициализация статических переменных:
+static uint32_t ticks_per_us;
 
 // Функция выхода в ошибку:
 void Error_Handler(void)
@@ -21,6 +27,18 @@ void Error_Handler(void)
 void SysTick_Handler(void)
 {
     HAL_IncTick();
+}
+
+// Функция счётчика микросекундных пауз:
+void Delay_us(uint32_t us)
+{
+    const uint32_t target_ticks = us * ticks_per_us;
+    const uint32_t start_ticks = DWT->CYCCNT;
+
+    while((DWT->CYCCNT - start_ticks) < target_ticks)
+    {
+        __NOP();
+    }
 }
 
 // Функция настройки тактирования:
@@ -64,6 +82,16 @@ void SystemClock_Config(void)
     {
         Error_Handler();
     }
+}
+
+// Функция инициализации счётчика DWT:
+void DWT_Init(void)
+{
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CYCCNT = 0;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
+    ticks_per_us = SystemCoreClock / 1000000U;
 }
 
 // Функция инициализации GPIO:
