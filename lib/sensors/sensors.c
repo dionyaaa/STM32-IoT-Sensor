@@ -4,6 +4,7 @@
 #include <assert.h> // Для assert().
 #include <stdint.h> // Для типов uint8_t и uint32_t.
 
+#include "board.h"
 #include "sensors.h"
 
 // Инициализация статических переменных:

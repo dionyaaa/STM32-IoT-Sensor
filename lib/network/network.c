@@ -6,6 +6,7 @@
 #include <string.h> // Для strlen(), strstr(), strchr() и memset().
 
 #include "config.h"
+#include "board.h"
 #include "sensors.h"
 #include "network.h"
 
