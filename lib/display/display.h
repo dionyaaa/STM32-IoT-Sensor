@@ -48,5 +48,6 @@
 void Display_Init(void);
 void Display_Clear(void);
 void Display_PrintString(const char* str);
+void Display_SetCursor(uint8_t row, uint8_t col);
 
 #endif

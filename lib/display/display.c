@@ -7,6 +7,9 @@
 #include "board.h"
 #include "display.h"
 
+// Инициализация статических переменных:
+static const uint8_t row_offsets[] = {0x00, 0x40, 0x14, 0x54};
+
 // Статическая функция установки четырёх бит на шину (DB4-DB7):
 static void display_set_data_pins(uint8_t nibble)
 {
@@ -91,4 +94,15 @@ void Display_PrintString(const char* str)
         str++;
         Delay_us(50);
     }
+}
+
+// Функция установки курсора в нужную позицию:
+void Display_SetCursor(uint8_t row, uint8_t col)
+{
+    // Проверка передаваемых данных:
+    assert(row <= 3 && col <=19);
+
+    // Установка курсора:
+    display_send(DISPLAY_SETDDRAMADDR | (row_offsets[row] + col), GPIO_PIN_RESET);
+    Delay_us(50);
 }

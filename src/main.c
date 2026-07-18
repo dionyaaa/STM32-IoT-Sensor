@@ -43,47 +43,80 @@ int main(void)
 
     // Переменные:
     SensorsData_t data;
+    char sensor_readings[21];
 
+    const char* wifi_connection = "Wi-Fi connection... ";
+    const char* server_sending = "Sending to server...";
+    const char* wifi_error = "    Wi-Fi error!    ";
+    const char* sending_error = "   Sending error!   ";
+    const char* sending_completed = " Sending completed! ";
+
+    // Главный цикл:
     while (1)
     {
-        // Главный цикл:
-        Sensors_ReadAll(&data); // Чтение всех показаний датчика.
+        // Чтение всех показаний датчика:
+        Sensors_ReadAll(&data);
 
-        if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_SET) // Проверка нажатия кнопки.
+        // Вывод показаний датчика на дисплей:
+        sprintf(sensor_readings, "Sensor readings:    ");
+        Display_SetCursor(0, 0);
+        Display_PrintString(sensor_readings);
+
+        sprintf(sensor_readings, "T: %-15.2f C", data.temperature);
+        Display_SetCursor(1, 0);
+        Display_PrintString(sensor_readings);
+
+        sprintf(sensor_readings, "P: %-13.2f hPa", data.pressure);
+        Display_SetCursor(2, 0);
+        Display_PrintString(sensor_readings);
+
+        sprintf(sensor_readings, "H: %-15.2f %%", data.humidity);
+        Display_SetCursor(3, 0);
+        Display_PrintString(sensor_readings);
+
+        // Проверка нажатия кнопки:
+        if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_SET)
         {
-            if(Network_CheckWiFi() == NETWORK_OK) // Проверка подключения к Wi-Fi-сети.
+            // Ожидание перед очисткой дисплея:
+            HAL_Delay(1000);
+
+            // Очистка дисплея и установка курсора в нужное место:
+            Display_Clear();
+            Display_SetCursor(1, 0);
+
+            // Подключение к Wi-Fi-сети, если это необходимо:
+            if(Network_CheckWiFi() != NETWORK_OK)
             {
+                Display_PrintString(wifi_connection); // Сообщение о попытке подключения к Wi-Fi-сети.
+                Network_ConnectWiFi(); // Попытка подключения к Wi-Fi-сети.
+                Display_SetCursor(1, 0);
+            }
+
+            // Проверка подключения к Wi-Fi-сети:
+            if(Network_CheckWiFi() == NETWORK_OK)
+            {
+                Display_PrintString(server_sending); // Сообщение о попытке отправки данных на сервер.
+                Display_SetCursor(1, 0);
+                
                 if(Network_Send(&data) == NETWORK_OK) // Попытка отправки данных на сервер.
                 {
-                    // Сообщение на дисплее об успешной отправке данных на сервер.
+                    Display_PrintString(sending_completed); // Сообщение об успешной отправке данных на сервер.
                 }
                 else
                 {
-                    // Сообщение на дисплее об ошибке при отправке данных на сервер.
+                    Display_PrintString(sending_error); // Сообщение об ошибке отправки данных на сервер.
                 }
             }
             else
             {
-                Network_ConnectWiFi(); // Попытка подключения к Wi-Fi-сети.
-
-                if(Network_CheckWiFi() == NETWORK_OK) // Проверка подключения к Wi-Fi-сети.
-                {
-                    if(Network_Send(&data) == NETWORK_OK) // Попытка отправки данных на сервер.
-                    {
-                        // Сообщение на дисплее об успешной отправке данных на сервер.
-                    }
-                    else
-                    {
-                        // Сообщение на дисплее об ошибке при отправке данных на сервер.
-                    }
-                }
-                else
-                {
-                    // Сообщение на дисплее об ошибке при подключении к сети.
-                }
+                Display_PrintString(wifi_error); // Сообщение об ошибке подключения к Wi-Fi-сети.
             }
+
+            // Ожидание для прочтения ответов:
+            HAL_Delay(2000);
         }
 
-        HAL_Delay(1000); // Задержка перед повторным чтением.
+        // Задержка перед повторным чтением:
+        HAL_Delay(1000);
     }
 }
