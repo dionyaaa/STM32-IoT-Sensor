@@ -73,10 +73,16 @@ void Network_Init(UART_HandleTypeDef* huart, UART_HandleTypeDef* debug_huart)
         Error_Handler();
     }
 
-    HAL_Delay(RESTART_TIME);
+    HAL_Delay(MODULE_RESTART_TIME);
 
     // Установка режима работы Wi-Fi-модуля в режиме Wi-Fi-клиента:
     if(network_uart_send("AT+CWMODE_CUR=1", response, RESPONSE_SIZE) != NETWORK_OK)
+    {
+        Error_Handler();
+    }
+
+    // Отключение проверки сертификата сервера:
+    if(network_uart_send("AT+CIPSSLCCONF=0", response, RESPONSE_SIZE) != NETWORK_OK)
     {
         Error_Handler();
     }
@@ -181,7 +187,7 @@ uint8_t Network_Send(SensorsData_t* data)
         return NETWORK_ERROR;
     }
 
-    HAL_Delay(SEND_TIME);
+    HAL_Delay(DATA_SEND_TIME);
 
     // Закрытие соединения, если не было закрыто со стороны сервера:
     network_uart_send("AT+CIPCLOSE", response, RESPONSE_SIZE);
