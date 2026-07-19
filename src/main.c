@@ -3,6 +3,7 @@
 #include <stdio.h> // Для sprintf().
 #include <string.h> // Для strlen().
 
+#include "config.h"
 #include "board.h"
 #include "display.h"
 #include "sensors.h"
@@ -30,7 +31,7 @@ int main(void)
     MX_I2C1_Init();
 
     // Инициализация периферии успешна, горит только красный светодиод:
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LED_GPIO_PORT, LED3_PIN, GPIO_PIN_SET);
 
     // Инициализация драйверов периферийных устройств:
     Display_Init();
@@ -38,8 +39,8 @@ int main(void)
     Network_Init(&huart2, &huart3);
 
     // Инициализация драйверов периферии и подключение к Wi-Fi прошло успешно, горит только зелёный светодиод:
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LED_GPIO_PORT, LED3_PIN, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED_GPIO_PORT, LED1_PIN, GPIO_PIN_SET);
 
     // Переменные:
     SensorsData_t data;
@@ -75,7 +76,7 @@ int main(void)
         Display_PrintString(sensor_readings);
 
         // Проверка нажатия кнопки:
-        if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_SET)
+        if(HAL_GPIO_ReadPin(BUTTON_GPIO_PORT, BUTTON_PIN) == GPIO_PIN_SET)
         {
             // Ожидание перед очисткой дисплея:
             HAL_Delay(1000);

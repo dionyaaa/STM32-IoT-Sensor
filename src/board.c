@@ -17,7 +17,7 @@ static uint32_t ticks_per_us;
 void Error_Handler(void)
 {
     __disable_irq();
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET); // Горит синий светодиод - возникла ошибка.
+    HAL_GPIO_WritePin(LED_GPIO_PORT, LED2_PIN, GPIO_PIN_SET); // Горит синий светодиод - возникла ошибка.
     while (1)
     {
         // Зависание в цикле.
@@ -102,32 +102,27 @@ void MX_GPIO_Init(void)
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
     // Включение тактирования портов:
-    // __HAL_RCC_GPIOA_CLK_ENABLE();
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-    // __HAL_RCC_GPIOD_CLK_ENABLE();
-    __HAL_RCC_GPIOE_CLK_ENABLE();
-    // __HAL_RCC_GPIOF_CLK_ENABLE();
-    // __HAL_RCC_GPIOG_CLK_ENABLE();
-    // __HAL_RCC_GPIOH_CLK_ENABLE();
+    RCC_GPIO_PORT_CLK_ENABLE(LED_GPIO_PORT);
+    RCC_GPIO_PORT_CLK_ENABLE(BUTTON_GPIO_PORT);
+    RCC_GPIO_PORT_CLK_ENABLE(DISPLAY_GPIO_PORT);
 
-    // Настройка пинов PB0, PB7 и PB14 (светодиоды):
-    GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_7 | GPIO_PIN_14;
+    // Настройка пинов светодиодов:
+    GPIO_InitStruct.Pin = LED1_PIN | LED2_PIN | LED3_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(LED_GPIO_PORT, &GPIO_InitStruct);
 
-    // Настройка пина PC13 (кнопка):
-    GPIO_InitStruct.Pin = GPIO_PIN_13;
+    // Выключение пинов светодиодов:
+    HAL_GPIO_WritePin(LED_GPIO_PORT, LED1_PIN | LED2_PIN | LED3_PIN, GPIO_PIN_RESET);
+
+    // Настройка пина кнопки:
+    GPIO_InitStruct.Pin = BUTTON_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+    GPIO_InitStruct.Pull = BUTTON_PULL;
+    HAL_GPIO_Init(BUTTON_GPIO_PORT, &GPIO_InitStruct);
 
-    // Выключение пинов PB0, PB7 и PB14 (светодиоды):
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0 | GPIO_PIN_14 | GPIO_PIN_7, GPIO_PIN_RESET);
-
-    // Настройка пинов подключения дисплея:
+    // Настройка пинов дисплея:
     GPIO_InitStruct.Pin = DISPLAY_RS_PIN | DISPLAY_E_PIN | DISPLAY_DB4_PIN |
                         DISPLAY_DB5_PIN | DISPLAY_DB6_PIN | DISPLAY_DB7_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -135,7 +130,7 @@ void MX_GPIO_Init(void)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(DISPLAY_GPIO_PORT, &GPIO_InitStruct);
 
-    // Выключение пинов подключение дисплея:
+    // Выключение пинов дисплея:
     HAL_GPIO_WritePin(DISPLAY_GPIO_PORT, DISPLAY_RS_PIN | DISPLAY_E_PIN | DISPLAY_DB4_PIN |
                     DISPLAY_DB5_PIN | DISPLAY_DB6_PIN | DISPLAY_DB7_PIN, GPIO_PIN_RESET);
 }
@@ -144,7 +139,7 @@ void MX_GPIO_Init(void)
 void MX_USART2_UART_Init(void)
 {
     huart2.Instance = USART2;
-    huart2.Init.BaudRate = 115200;
+    huart2.Init.BaudRate = UART_NETWORK_BAUDRATE;
     huart2.Init.WordLength = UART_WORDLENGTH_8B;
     huart2.Init.StopBits = UART_STOPBITS_1;
     huart2.Init.Parity = UART_PARITY_NONE;
@@ -161,7 +156,7 @@ void MX_USART2_UART_Init(void)
 void MX_USART3_UART_Init(void)
 {
     huart3.Instance = USART3;
-    huart3.Init.BaudRate = 115200;
+    huart3.Init.BaudRate = UART_DEBUG_BAUDRATE;
     huart3.Init.WordLength = UART_WORDLENGTH_8B;
     huart3.Init.StopBits = UART_STOPBITS_1;
     huart3.Init.Parity = UART_PARITY_NONE;
@@ -182,26 +177,26 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     if(huart->Instance == USART2)
     {
         __HAL_RCC_USART2_CLK_ENABLE();
-        __HAL_RCC_GPIOD_CLK_ENABLE();
+        RCC_GPIO_PORT_CLK_ENABLE(UART_NETWORK_GPIO_PORT);
 
-        GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_6;
+        GPIO_InitStruct.Pin = UART_NETWORK_TX_PIN | UART_NETWORK_RX_PIN;
         GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-        GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
-        HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+        GPIO_InitStruct.Alternate = UART_NETWORK_AF;
+        HAL_GPIO_Init(UART_NETWORK_GPIO_PORT, &GPIO_InitStruct);
     }
     else if(huart->Instance == USART3)
     {
         __HAL_RCC_USART3_CLK_ENABLE();
-        __HAL_RCC_GPIOD_CLK_ENABLE();
+        RCC_GPIO_PORT_CLK_ENABLE(UART_DEBUG_GPIO_PORT);
 
-        GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
+        GPIO_InitStruct.Pin = UART_DEBUG_TX_PIN | UART_DEBUG_RX_PIN;
         GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-        GPIO_InitStruct.Alternate = GPIO_AF7_USART3;
-        HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+        GPIO_InitStruct.Alternate = UART_DEBUG_AF;
+        HAL_GPIO_Init(UART_DEBUG_GPIO_PORT, &GPIO_InitStruct);
     }
 }
 
@@ -209,7 +204,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 void MX_I2C1_Init(void)
 {
     hi2c1.Instance = I2C1;
-    hi2c1.Init.ClockSpeed = 100000;
+    hi2c1.Init.ClockSpeed = I2C1_CLOCK_SPEED;
     hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
     hi2c1.Init.OwnAddress1 = 0;
     hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -231,13 +226,13 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c)
     if(hi2c->Instance == I2C1)
     {
         __HAL_RCC_I2C1_CLK_ENABLE();
-        __HAL_RCC_GPIOB_CLK_ENABLE();
+        RCC_GPIO_PORT_CLK_ENABLE(I2C1_GPIO_PORT);
 
-        GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
+        GPIO_InitStruct.Pin = I2C1_SCL_PIN | I2C1_SDA_PIN;
         GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-        GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
-        HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+        GPIO_InitStruct.Alternate = I2C1_AF;
+        HAL_GPIO_Init(I2C1_GPIO_PORT, &GPIO_InitStruct);
     }
 }
