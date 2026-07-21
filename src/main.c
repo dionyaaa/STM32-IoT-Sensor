@@ -67,7 +67,7 @@ int main(void)
         Display_SetCursor(1, 0);
         Display_PrintString(sensor_readings);
 
-        sprintf(sensor_readings, "P: %-13.2f hPa", data.pressure);
+        sprintf(sensor_readings, "P: %-13.2f  Pa", data.pressure);
         Display_SetCursor(2, 0);
         Display_PrintString(sensor_readings);
 
