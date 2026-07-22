@@ -2,7 +2,7 @@
 #define NETWORK_H
 
 #include "stm32f4xx_hal.h"
-#include "sensors.h"
+#include "sensor.h"
 
 #define NETWORK_OK 0
 #define NETWORK_ERROR 1
@@ -18,6 +18,6 @@
 void Network_Init(UART_HandleTypeDef* huart, UART_HandleTypeDef* debug_huart);
 void Network_ConnectWiFi(void);
 uint8_t Network_CheckWiFi(void);
-uint8_t Network_Send(SensorsData_t* data);
+uint8_t Network_Send(SensorData_t* data);
 
 #endif

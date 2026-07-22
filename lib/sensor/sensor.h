@@ -1,16 +1,16 @@
-#ifndef SENSORS_H
-#define SENSORS_H
+#ifndef SENSOR_H
+#define SENSOR_H
 
 #include "stm32f4xx_hal.h"
 
-typedef struct SensorsData_t
+typedef struct SensorData_t
 {
     double temperature;
     double pressure;
     double humidity;
-} SensorsData_t;
+} SensorData_t;
 
-void Sensors_Init(I2C_HandleTypeDef* hi2c);
-void Sensors_ReadAll(SensorsData_t* data);
+void Sensor_Init(I2C_HandleTypeDef* hi2c);
+void Sensor_ReadAll(SensorData_t* data);
 
 #endif

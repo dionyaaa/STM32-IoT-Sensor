@@ -6,7 +6,7 @@
 #include "config.h"
 #include "board.h"
 #include "display.h"
-#include "sensors.h"
+#include "sensor.h"
 #include "network.h"
 
 int main(void)
@@ -35,7 +35,7 @@ int main(void)
 
     // Инициализация драйверов периферийных устройств:
     Display_Init();
-    Sensors_Init(&hi2c1);
+    Sensor_Init(&hi2c1);
     Network_Init(&huart2, &huart3);
 
     // Инициализация драйверов периферии и подключение к Wi-Fi прошло успешно, горит только зелёный светодиод:
@@ -43,7 +43,7 @@ int main(void)
     HAL_GPIO_WritePin(LED_GPIO_PORT, LED1_PIN, GPIO_PIN_SET);
 
     // Переменные:
-    SensorsData_t data;
+    SensorData_t data;
     char sensor_readings[21];
 
     const char* wifi_connection = "Wi-Fi connection... ";
@@ -56,7 +56,7 @@ int main(void)
     while (1)
     {
         // Чтение всех показаний датчика:
-        Sensors_ReadAll(&data);
+        Sensor_ReadAll(&data);
 
         // Вывод показаний датчика на дисплей:
         sprintf(sensor_readings, "Sensor readings:    ");

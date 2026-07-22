@@ -7,7 +7,7 @@
 
 #include "config.h"
 #include "board.h"
-#include "sensors.h"
+#include "sensor.h"
 #include "network.h"
 
 // Инициализация статических переменных:
@@ -120,7 +120,7 @@ uint8_t Network_CheckWiFi(void)
 }
 
 // Функция отправки данных на сервер:
-uint8_t Network_Send(SensorsData_t* data)
+uint8_t Network_Send(SensorData_t* data)
 {
     // Проверка передаваемых данных:
     assert(data != NULL && network_huart != NULL);
