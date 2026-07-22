@@ -54,7 +54,7 @@ def receive():
         temperature = json_data.get("temperature", 0.0)
         pressure = json_data.get("pressure", 0.0)
         humidity = json_data.get("humidity", 0.0)
-        time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        time = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
 
         connection = sqlite3.connect("database.db")
         cursor = connection.cursor()
