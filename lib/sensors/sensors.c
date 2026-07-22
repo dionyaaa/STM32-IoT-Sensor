@@ -45,8 +45,7 @@ static int8_t bme280_i2c_write(uint8_t reg_addr, const uint8_t* reg_data, uint32
 
 static void bme280_delay_us(uint32_t period, void* intf_ptr)
 {
-    // ВРЕМЕННО! Сделать другую реализацию.
-    HAL_Delay(1);
+    Delay_us(period);
 }
 
 // Функция инициализации датчиков:
